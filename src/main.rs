@@ -34,6 +34,7 @@ struct MyEguiApp {
     selected_color: ColorChoice,
     counter: i32,
     current_mode: AppMode,
+    lines: [String; 16],
 }
 
 impl Default for MyEguiApp {
@@ -45,12 +46,21 @@ impl Default for MyEguiApp {
             selected_color: ColorChoice::Red,
             counter: 0,
             current_mode: AppMode::View,
+            lines: std::array::from_fn(|_| String::new()),
         }
     }
 }
 
 impl eframe::App for MyEguiApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        egui::Panel::left("stuff idk").show_inside(ui, |ui| {
+            ui.vertical(|ui| {
+                for line in &mut self.lines {
+                    ui.text_edit_singleline(line);
+                }
+            })
+        });
+
         egui::Panel::top("mode_switcher").show_inside(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.label("Mode: ");

@@ -1,11 +1,15 @@
-use crate::app::settings::Settings;
+use crate::app::{camera::Camera, settings::Settings};
 use eframe::egui;
 
+mod camera;
 mod settings;
+mod widgets;
 
 pub struct App {
     settings: Settings,
     show_settings: bool,
+
+    camera: Camera,
 }
 
 impl Default for App {
@@ -13,6 +17,7 @@ impl Default for App {
         Self {
             settings: Settings::default(),
             show_settings: false,
+            camera: Camera::home(1.0),
         }
     }
 }
@@ -28,7 +33,7 @@ impl eframe::App for App {
         if self.show_settings {
             egui::Window::new("Settings")
                 .open(&mut self.show_settings)
-                .show(ui.ctx(), |ui| {});
+                .show(ui.ctx(), |ui| self.settings.ui(ui, &mut self.camera));
         }
         egui::Panel::left("equations").show_inside(ui, |ui| {
             // todo

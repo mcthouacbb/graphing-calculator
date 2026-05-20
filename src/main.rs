@@ -1,32 +1,17 @@
-use eframe::egui;
+use crate::app::App;
+
+mod app;
+mod renderer;
 
 fn main() {
     let native_options = eframe::NativeOptions::default();
-    eframe::run_native(
+    let result = eframe::run_native(
         "Graphing Calculator",
         native_options,
-        Box::new(|cc| Ok(Box::new(MyEguiApp::new(cc)))),
+        Box::new(|_cc| Ok(Box::new(App::default()))),
     );
-    println!("Hello, world!");
-}
 
-#[derive(Default)]
-struct MyEguiApp {}
-
-impl MyEguiApp {
-    fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        // Customize egui here with cc.egui_ctx.set_fonts and cc.egui_ctx.set_global_style.
-        // Restore app state using cc.storage (requires the "persistence" feature).
-        // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
-        // for e.g. egui::PaintCallback.
-        Self::default()
-    }
-}
-
-impl eframe::App for MyEguiApp {
-    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show_inside(ui, |ui| {
-            ui.heading("Hello World!");
-        });
+    if let Err(err) = result {
+        eprintln!("Failed to start graphing calculator: {}", err);
     }
 }

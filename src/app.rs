@@ -1,7 +1,8 @@
-use crate::app::{camera::Camera, settings::Settings};
+use crate::app::{camera::Camera, equation_editor::EquationEditor, settings::Settings};
 use eframe::egui;
 
 mod camera;
+mod equation_editor;
 mod settings;
 mod widgets;
 
@@ -10,6 +11,7 @@ pub struct App {
     show_settings: bool,
 
     camera: Camera,
+    equations: Vec<EquationEditor>,
 }
 
 impl Default for App {
@@ -18,6 +20,7 @@ impl Default for App {
             settings: Settings::default(),
             show_settings: false,
             camera: Camera::home(1.0),
+            equations: vec![EquationEditor::new()],
         }
     }
 }
@@ -35,8 +38,12 @@ impl eframe::App for App {
                 .open(&mut self.show_settings)
                 .show(ui.ctx(), |ui| self.settings.ui(ui, &mut self.camera));
         }
-        egui::Panel::left("equations").show_inside(ui, |ui| {
-            // todo
+        egui::Panel::left("equation_editors").show_inside(ui, |ui| {
+            for (idx, equation) in self.equations.iter_mut().enumerate() {
+                ui.push_id(idx, |ui| {
+                    equation.ui(ui);
+                });
+            }
         });
         egui::CentralPanel::default().show_inside(ui, |ui| {
             // todo

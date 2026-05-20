@@ -1,4 +1,7 @@
-use crate::app::{camera::Camera, equation_editor::EquationEditor, settings::Settings};
+use crate::{
+    app::{camera::Camera, equation_editor::EquationEditor, settings::Settings},
+    renderer,
+};
 use eframe::egui;
 
 mod camera;
@@ -12,6 +15,10 @@ pub struct App {
 
     camera: Camera,
     equations: Vec<EquationEditor>,
+
+    texture: Option<egui::TextureHandle>,
+    framebuffer: Vec<egui::Color32>,
+    fb_size: [usize; 2],
 }
 
 impl Default for App {
@@ -21,6 +28,10 @@ impl Default for App {
             show_settings: false,
             camera: Camera::home(1.0),
             equations: vec![EquationEditor::new()],
+
+            texture: None,
+            framebuffer: Vec::new(),
+            fb_size: [0; 2],
         }
     }
 }
@@ -45,8 +56,42 @@ impl eframe::App for App {
                 });
             }
         });
-        egui::CentralPanel::default().show_inside(ui, |ui| {
-            // todo
-        });
+
+        egui::CentralPanel::default()
+            .frame(egui::Frame::NONE)
+            .show_inside(ui, |ui| {
+                let pixels_per_point = ui.ctx().pixels_per_point();
+                let width = (ui.max_rect().width() * pixels_per_point).round() as usize;
+                let height = (ui.max_rect().height() * pixels_per_point).round() as usize;
+
+                if self.fb_size[0] != width || self.fb_size[1] != height {
+                    self.framebuffer
+                        .resize(width * height, egui::Color32::BLACK);
+                    self.fb_size = [width, height]
+                }
+
+                if width > 0 && height > 0 {
+                    renderer::render(width, height, &mut self.framebuffer);
+                    let image = egui::ColorImage::new(self.fb_size, self.framebuffer.clone());
+
+                    let texture = if let Some(texture) = self.texture.as_mut() {
+                        texture.set(image, egui::TextureOptions::LINEAR);
+                        texture
+                    } else {
+                        self.texture = Some(ui.ctx().load_texture(
+                            "framebuffer",
+                            image,
+                            egui::TextureOptions::LINEAR,
+                        ));
+                        self.texture.as_ref().unwrap()
+                    };
+                    ui.painter().image(
+                        texture.id(),
+                        ui.max_rect(),
+                        egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+                        egui::Color32::WHITE,
+                    );
+                }
+            });
     }
 }

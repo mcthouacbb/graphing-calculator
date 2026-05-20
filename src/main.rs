@@ -1,6 +1,7 @@
 use crate::app::App;
 
 mod app;
+mod renderer;
 
 fn main() {
     let native_options = eframe::NativeOptions::default();

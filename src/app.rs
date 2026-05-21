@@ -7,7 +7,7 @@ use eframe::egui;
 
 pub mod camera;
 mod equation_editor;
-mod settings;
+pub mod settings;
 mod widgets;
 
 pub struct App {
@@ -90,6 +90,14 @@ impl eframe::App for App {
                         egui::Rect::from_min_size(ui.max_rect().min, texture.size_vec2()),
                         egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
                         egui::Color32::WHITE,
+                    );
+
+                    renderer::render_graph_structure(
+                        &self.camera,
+                        &self.settings,
+                        ui,
+                        width,
+                        height,
                     );
                 }
             });

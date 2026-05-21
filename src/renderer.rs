@@ -1,4 +1,7 @@
-use crate::{app::camera::Camera, renderer::graph::graph_equation};
+use crate::{
+    app::{camera::Camera, settings::Settings},
+    renderer::graph::graph_equation,
+};
 
 use eframe::egui;
 
@@ -17,4 +20,33 @@ pub fn render(camera: &Camera, width: usize, height: usize, framebuffer: &mut Ve
     graph_equation(camera, width, height, framebuffer, |x, y| {
         x.powi(2) + y.powi(2) - 1.0
     });
+}
+
+pub fn render_graph_structure(
+    camera: &Camera,
+    settings: &Settings,
+    ui: &egui::Ui,
+    width: usize,
+    height: usize,
+) {
+    let (origin_x, origin_y) = camera.world_to_screen(0.0, 0.0);
+
+    let min_x = ui.max_rect().min.x;
+    let min_y = ui.max_rect().min.y;
+    // x-axis
+    if origin_y >= 0.0 && origin_y <= 1.0 {
+        ui.painter().hline(
+            ui.max_rect().x_range(),
+            min_y + (origin_y * height as f64 - 0.5) as f32,
+            egui::Stroke::new(2.5, egui::Color32::BLACK),
+        );
+    }
+
+    if origin_x >= 0.0 && origin_x <= 1.0 {
+        ui.painter().vline(
+            min_x + (origin_x * width as f64 - 0.5) as f32,
+            ui.max_rect().y_range(),
+            egui::Stroke::new(2.5, egui::Color32::BLACK),
+        );
+    }
 }

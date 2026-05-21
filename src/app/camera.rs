@@ -22,4 +22,12 @@ impl Camera {
             self.bottom * y + self.top * (1.0 - y),
         )
     }
+
+    pub fn world_to_screen(&self, x: f64, y: f64) -> (f64, f64) {
+        (
+            (x - self.left) / (self.right - self.left),
+            // y coordinates are flipped
+            (y - self.top) / (self.bottom - self.top),
+        )
+    }
 }

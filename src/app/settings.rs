@@ -1,6 +1,6 @@
-use eframe::egui;
-
 use crate::app::{camera::Camera, widgets::float_input};
+
+use eframe::egui;
 
 #[derive(Default)]
 pub struct Settings {

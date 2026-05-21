@@ -1,6 +1,10 @@
+use crate::{app::camera::Camera, renderer::graph::graph_equation};
+
 use eframe::egui;
 
-pub fn render(width: usize, height: usize, framebuffer: &mut Vec<egui::Color32>) {
+mod graph;
+
+pub fn render(camera: &Camera, width: usize, height: usize, framebuffer: &mut Vec<egui::Color32>) {
     for y in 0..height {
         for x in 0..width {
             let r = (0.5 + 255.0 * (y as f32 / height as f32)) as u8;
@@ -9,4 +13,5 @@ pub fn render(width: usize, height: usize, framebuffer: &mut Vec<egui::Color32>)
             framebuffer[y * width + x] = egui::Color32::from_rgb(r, g, b);
         }
     }
+    graph_equation(camera, width, height, framebuffer, |x, y| x.powi(2) - y);
 }

@@ -2,9 +2,10 @@ use crate::{
     app::{camera::Camera, equation_editor::EquationEditor, settings::Settings},
     renderer,
 };
+
 use eframe::egui;
 
-mod camera;
+pub mod camera;
 mod equation_editor;
 mod settings;
 mod widgets;
@@ -71,7 +72,7 @@ impl eframe::App for App {
                 }
 
                 if width > 0 && height > 0 {
-                    renderer::render(width, height, &mut self.framebuffer);
+                    renderer::render(&self.camera, width, height, &mut self.framebuffer);
                     let image = egui::ColorImage::new(self.fb_size, self.framebuffer.clone());
 
                     let texture = if let Some(texture) = self.texture.as_mut() {

@@ -30,4 +30,25 @@ impl Camera {
             (y - self.top) / (self.bottom - self.top),
         )
     }
+
+    pub fn translate(&mut self, delta_x: f64, delta_y: f64) {
+        let offset_x = -delta_x * (self.right - self.left);
+        // y coordinates are flipped
+        let offset_y = delta_y * (self.right - self.left);
+        self.left += offset_x;
+        self.right += offset_x;
+        self.bottom += offset_y;
+        self.top += offset_y;
+    }
+
+    pub fn zoom(&mut self, pos_x: f64, pos_y: f64, scroll: f64) {
+        let factor = (-scroll / 100.0).exp();
+        let (pos_x, pos_y) = self.screen_to_world(pos_x, pos_y);
+
+        self.left = pos_x + factor * (self.left - pos_x);
+        self.right = pos_x + factor * (self.right - pos_x);
+
+        self.bottom = pos_y + factor * (self.bottom - pos_y);
+        self.top = pos_y + factor * (self.top - pos_y);
+    }
 }

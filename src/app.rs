@@ -61,6 +61,21 @@ impl eframe::App for App {
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show_inside(ui, |ui| {
+                ui.input(|input| {
+                    if input.pointer.primary_down() {
+                        let delta = input.pointer.delta() / ui.max_rect().size();
+                        self.camera.translate(delta.x as f64, delta.y as f64);
+                    }
+                    if let Some(pointer_pos) = input.pointer.latest_pos() {
+                        let pos = (pointer_pos - ui.max_rect().min) / ui.max_rect().size();
+                        self.camera.zoom(
+                            pos.x as f64,
+                            pos.y as f64,
+                            input.smooth_scroll_delta().y as f64,
+                        );
+                    }
+                });
+
                 let width = ui.max_rect().width().ceil() as usize;
                 let height = ui.max_rect().height().ceil() as usize;
 

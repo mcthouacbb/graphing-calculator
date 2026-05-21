@@ -34,7 +34,7 @@ impl Camera {
     pub fn translate(&mut self, delta_x: f64, delta_y: f64) {
         let offset_x = -delta_x * (self.right - self.left);
         // y coordinates are flipped
-        let offset_y = delta_y * (self.right - self.left);
+        let offset_y = delta_y * (self.top - self.bottom);
         self.left += offset_x;
         self.right += offset_x;
         self.bottom += offset_y;

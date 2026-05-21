@@ -61,9 +61,8 @@ impl eframe::App for App {
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show_inside(ui, |ui| {
-                let pixels_per_point = ui.ctx().pixels_per_point();
-                let width = (ui.max_rect().width() * pixels_per_point).round() as usize;
-                let height = (ui.max_rect().height() * pixels_per_point).round() as usize;
+                let width = ui.max_rect().width().ceil() as usize;
+                let height = ui.max_rect().height().ceil() as usize;
 
                 if self.fb_size[0] != width || self.fb_size[1] != height {
                     self.framebuffer
@@ -88,7 +87,7 @@ impl eframe::App for App {
                     };
                     ui.painter().image(
                         texture.id(),
-                        ui.max_rect(),
+                        egui::Rect::from_min_size(ui.max_rect().min, texture.size_vec2()),
                         egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
                         egui::Color32::WHITE,
                     );

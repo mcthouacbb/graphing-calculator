@@ -115,6 +115,16 @@ impl eframe::App for App {
                         height,
                     );
                 }
+
+                ui.allocate_ui_with_layout(
+                    ui.available_size(),
+                    egui::Layout::right_to_left(egui::Align::Min),
+                    |ui| {
+                        if ui.button("Home").clicked() {
+                            self.camera = Camera::home(width as f64 / height as f64);
+                        }
+                    },
+                );
             });
     }
 }

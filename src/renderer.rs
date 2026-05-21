@@ -14,4 +14,7 @@ pub fn render(camera: &Camera, width: usize, height: usize, framebuffer: &mut Ve
         }
     }
     graph_equation(camera, width, height, framebuffer, |x, y| x.powi(2) - y);
+    graph_equation(camera, width, height, framebuffer, |x, y| {
+        x.powi(2) + y.powi(2) - 1.0
+    });
 }

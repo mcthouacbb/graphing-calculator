@@ -7,7 +7,7 @@ use eframe::egui;
 
 pub mod camera;
 mod equation_editor;
-mod settings;
+pub mod settings;
 mod widgets;
 
 pub struct App {
@@ -61,6 +61,21 @@ impl eframe::App for App {
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show_inside(ui, |ui| {
+                ui.input(|input| {
+                    if input.pointer.primary_down() {
+                        let delta = input.pointer.delta() / ui.max_rect().size();
+                        self.camera.translate(delta.x as f64, delta.y as f64);
+                    }
+                    if let Some(pointer_pos) = input.pointer.latest_pos() {
+                        let pos = (pointer_pos - ui.max_rect().min) / ui.max_rect().size();
+                        self.camera.zoom(
+                            pos.x as f64,
+                            pos.y as f64,
+                            input.smooth_scroll_delta().y as f64,
+                        );
+                    }
+                });
+
                 let width = ui.max_rect().width().ceil() as usize;
                 let height = ui.max_rect().height().ceil() as usize;
 
@@ -91,7 +106,25 @@ impl eframe::App for App {
                         egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
                         egui::Color32::WHITE,
                     );
+
+                    renderer::render_graph_structure(
+                        &self.camera,
+                        &self.settings,
+                        ui,
+                        width,
+                        height,
+                    );
                 }
+
+                ui.allocate_ui_with_layout(
+                    ui.available_size(),
+                    egui::Layout::right_to_left(egui::Align::Min),
+                    |ui| {
+                        if ui.button("Home").clicked() {
+                            self.camera = Camera::home(width as f64 / height as f64);
+                        }
+                    },
+                );
             });
     }
 }

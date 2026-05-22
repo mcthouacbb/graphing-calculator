@@ -1,6 +1,9 @@
 use crate::{
     app::{camera::Camera, settings::Settings},
-    renderer::{graph::graph_equation, structure::tick_width},
+    renderer::{
+        graph::graph_equation,
+        structure::{fmt_tick_pos, tick_width},
+    },
 };
 
 use eframe::egui;
@@ -11,9 +14,6 @@ mod structure;
 pub fn render(camera: &Camera, width: usize, height: usize, framebuffer: &mut Vec<egui::Color32>) {
     for y in 0..height {
         for x in 0..width {
-            let r = (0.5 + 255.0 * (y as f32 / height as f32)) as u8;
-            let g = (0.5 + 255.0 * (x as f32 / width as f32)) as u8;
-            let b = 127u8;
             framebuffer[y * width + x] = egui::Color32::WHITE;
         }
     }
@@ -67,6 +67,31 @@ pub fn render_graph_structure(
             ui.max_rect().y_range(),
             egui::Stroke::new(1.5, egui::Color32::GRAY),
         );
+        let text_layout = ui.fonts_mut(|fonts| {
+            fonts.layout_no_wrap(
+                fmt_tick_pos(tick_x),
+                egui::FontId::proportional(12.0),
+                egui::Color32::BLACK,
+            )
+        });
+        let target_pos = egui::pos2(
+            min_x + (tick_screen_x * width as f64 - 0.5) as f32 - text_layout.size().x / 2.0,
+            min_y + (origin_y * height as f64 - 0.5) as f32 - text_layout.size().y,
+        );
+
+        let pos = egui::pos2(
+            target_pos.x.clamp(
+                ui.max_rect().left(),
+                ui.max_rect().right() - text_layout.size().x,
+            ),
+            target_pos.y.clamp(
+                ui.max_rect().top(),
+                ui.max_rect().bottom() - text_layout.size().y,
+            ),
+        );
+
+        ui.painter().galley(pos, text_layout, egui::Color32::WHITE);
+
         tick_x += tick_width_x;
     }
 
@@ -83,6 +108,32 @@ pub fn render_graph_structure(
             min_y + (tick_screen_y * height as f64 - 0.5) as f32,
             egui::Stroke::new(1.5, egui::Color32::GRAY),
         );
+
+        let text_layout = ui.fonts_mut(|fonts| {
+            fonts.layout_no_wrap(
+                fmt_tick_pos(tick_y),
+                egui::FontId::proportional(12.0),
+                egui::Color32::BLACK,
+            )
+        });
+        let target_pos = egui::pos2(
+            min_x + (origin_x * width as f64 - 0.5) as f32 + 5.0,
+            min_y + (tick_screen_y * height as f64 - 0.5) as f32 - text_layout.size().y,
+        );
+
+        let pos = egui::pos2(
+            target_pos.x.clamp(
+                ui.max_rect().left(),
+                ui.max_rect().right() - text_layout.size().x,
+            ),
+            target_pos.y.clamp(
+                ui.max_rect().top(),
+                ui.max_rect().bottom() - text_layout.size().y,
+            ),
+        );
+
+        ui.painter().galley(pos, text_layout, egui::Color32::WHITE);
+
         tick_y += tick_width_y;
     }
 }

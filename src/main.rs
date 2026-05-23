@@ -1,6 +1,7 @@
 use crate::app::App;
 
 mod app;
+mod equation;
 mod renderer;
 
 fn main() {

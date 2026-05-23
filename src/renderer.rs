@@ -1,5 +1,6 @@
 use crate::{
     app::{camera::Camera, settings::Settings},
+    equation::Equation,
     renderer::{
         graph::graph_equation,
         structure::{fmt_tick_pos, tick_width},
@@ -11,20 +12,23 @@ use eframe::egui;
 mod graph;
 mod structure;
 
-pub fn render(camera: &Camera, width: usize, height: usize, framebuffer: &mut Vec<egui::Color32>) {
+pub fn render(
+    camera: &Camera,
+    width: usize,
+    height: usize,
+    framebuffer: &mut Vec<egui::Color32>,
+    equations: &[&Equation],
+) {
     for y in 0..height {
         for x in 0..width {
             framebuffer[y * width + x] = egui::Color32::WHITE;
         }
     }
-    graph_equation(camera, width, height, framebuffer, |x, y| x.powi(2) - y);
-    graph_equation(camera, width, height, framebuffer, |x, y| {
-        x.powi(2) + y.powi(2) - 1.0
-    });
-    graph_equation(camera, width, height, framebuffer, |x, y| {
-        x.powi(2) - y.powi(2)
-    });
-    graph_equation(camera, width, height, framebuffer, |x, y| x.sin() - y);
+    for equation in equations {
+        graph_equation(camera, width, height, framebuffer, |x, y| {
+            equation.calc_residual(x, y)
+        });
+    }
 }
 
 pub fn render_graph_structure(

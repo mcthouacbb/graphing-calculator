@@ -135,6 +135,8 @@ impl<'a, 'b> Parser<'a, 'b> {
         }
     }
 
+    // TODO: when function calls are added, make sure to change the error messages
+
     fn parse_primary(&mut self) -> Result<Expr, ParseError<'a>> {
         if self.match_tok(TokenKind::Literal) {
             let tok = self.peek_prev().unwrap();

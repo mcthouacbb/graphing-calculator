@@ -1,5 +1,3 @@
-use std::ops::Range;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenKind {
     Identifier,

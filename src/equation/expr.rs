@@ -1,14 +1,14 @@
-pub mod binary_expr;
-pub mod const_expr;
-pub mod unary_expr;
-pub mod var_expr;
-
 use crate::equation::expr::{
     binary_expr::{BinaryExpr, BinaryOp},
     const_expr::ConstExpr,
     unary_expr::{UnaryExpr, UnaryOp},
     var_expr::VarExpr,
 };
+
+pub mod binary_expr;
+pub mod const_expr;
+pub mod unary_expr;
+pub mod var_expr;
 
 #[derive(Debug, Clone)]
 pub enum Expr {

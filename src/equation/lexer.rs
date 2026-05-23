@@ -111,7 +111,7 @@ impl<'a> Lexer<'a> {
                 '=' => TokenKind::Equal,
                 '(' => TokenKind::OpenParen,
                 ')' => TokenKind::CloseParen,
-                _ => return Err(LexError::InvalidToken(self.start_pos)),
+                _ => return Err(LexError::InvalidToken(self.start_pos, peek)),
             }
         };
 

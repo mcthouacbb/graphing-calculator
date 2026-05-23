@@ -1,13 +1,15 @@
 use eframe::egui;
 
 use crate::equation::{
+    Equation,
     lexer::{get_tokens, lex_error::LexError, token::TokenKind},
-    parser::{ExprOrEquation, parse_error::ParseError, parse_expr_or_equation},
+    parser::{parse_error::ParseError, parse_expr_or_equation},
+    resolver::{resolve_equation, resolve_error::ResolveError},
 };
 
 pub struct EquationEditor {
     data: String,
-    expr: Option<ExprOrEquation>,
+    equation: Option<Equation>,
     error: Option<String>,
 }
 
@@ -15,7 +17,7 @@ impl EquationEditor {
     pub fn new() -> Self {
         Self {
             data: String::new(),
-            expr: None,
+            equation: None,
             error: None,
         }
     }
@@ -27,6 +29,10 @@ impl EquationEditor {
         }
     }
 
+    pub fn equation(&self) -> &Option<Equation> {
+        &self.equation
+    }
+
     pub fn data(&self) -> &str {
         self.data.as_str()
     }
@@ -34,14 +40,14 @@ impl EquationEditor {
     fn text_edit_field(&mut self, ui: &mut egui::Ui) {
         if ui.text_edit_singleline(&mut self.data).changed() {
             if self.data.trim().is_empty() {
-                self.expr = None;
+                self.equation = None;
                 self.error = None;
                 return;
             }
 
             let lex_result = get_tokens(&self.data);
-            if let Err(lex_error) = lex_result {
-                self.expr = None;
+            if let Err(lex_error) = &lex_result {
+                self.equation = None;
 
                 self.error = Some(match lex_error {
                     LexError::InvalidToken(pos, chr) => {
@@ -54,8 +60,8 @@ impl EquationEditor {
 
             let tokens = lex_result.unwrap();
             let parse_result = parse_expr_or_equation(&tokens);
-            if let Err(parse_error) = parse_result {
-                self.expr = None;
+            if let Err(parse_error) = &parse_result {
+                self.equation = None;
 
                 self.error = Some(match parse_error {
                     ParseError::ExpectedPrimary(actual) => {
@@ -68,7 +74,7 @@ impl EquationEditor {
                             )
                         } else {
                             format!(
-                                "Expected a number, varibale, or parenthesized expression. Instead got end of input"
+                                "Expected a number, variable, or parenthesized expression. Instead got end of input"
                             )
                         }
                     }
@@ -109,7 +115,20 @@ impl EquationEditor {
                 return;
             }
 
-            self.expr = Some(parse_result.unwrap());
+            let resolve_result = resolve_equation(parse_result.unwrap());
+            if let Err(resolve_err) = &resolve_result {
+                self.equation = None;
+
+                self.error = Some(match resolve_err {
+                    ResolveError::UnknownIdentifier(identifier) => {
+                        // TODO: track where the identifier came from
+                        format!("Unknown identifier '{}'", identifier)
+                    }
+                });
+                return;
+            }
+
+            self.equation = Some(resolve_result.unwrap());
             self.error = None;
         }
     }

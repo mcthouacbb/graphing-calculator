@@ -1,8 +1,4 @@
-use std::{
-    char,
-    iter::{Enumerate, Peekable},
-    str::CharIndices,
-};
+use std::{char, iter::Peekable, str::CharIndices};
 
 use crate::equation::lexer::{
     lex_error::LexError,

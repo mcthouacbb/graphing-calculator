@@ -86,7 +86,19 @@ impl eframe::App for App {
                 }
 
                 if width > 0 && height > 0 {
-                    renderer::render(&self.camera, width, height, &mut self.framebuffer);
+                    let mut equations = Vec::with_capacity(self.equations.len());
+                    for equation_editor in &self.equations {
+                        if let Some(equation) = equation_editor.equation() {
+                            equations.push(equation);
+                        }
+                    }
+                    renderer::render(
+                        &self.camera,
+                        width,
+                        height,
+                        &mut self.framebuffer,
+                        &equations,
+                    );
                     let image = egui::ColorImage::new(self.fb_size, self.framebuffer.clone());
 
                     let texture = if let Some(texture) = self.texture.as_mut() {

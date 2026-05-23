@@ -108,6 +108,7 @@ impl<'a> Lexer<'a> {
                 '*' => TokenKind::Star,
                 '/' => TokenKind::Slash,
                 '^' => TokenKind::Caret,
+                '=' => TokenKind::Equal,
                 '(' => TokenKind::OpenParen,
                 ')' => TokenKind::CloseParen,
                 _ => return Err(LexError::InvalidToken(self.start_pos)),

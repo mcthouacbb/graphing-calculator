@@ -1,7 +1,7 @@
-mod binary_expr;
-mod const_expr;
-mod unary_expr;
-mod var_expr;
+pub mod binary_expr;
+pub mod const_expr;
+pub mod unary_expr;
+pub mod var_expr;
 
 use crate::equation::expr::{
     binary_expr::{BinaryExpr, BinaryOp},

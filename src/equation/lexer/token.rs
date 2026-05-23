@@ -9,6 +9,7 @@ pub enum TokenKind {
     Star,
     Slash,
     Caret,
+    Equal,
     OpenParen,
     CloseParen,
 }

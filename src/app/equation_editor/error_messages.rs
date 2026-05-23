@@ -71,5 +71,8 @@ pub fn resolver_error_message(resolve_error: &ResolveError) -> String {
             // TODO: track where the identifier came from
             format!("Unknown identifier '{}'", identifier)
         }
+        ResolveError::IncompleteEquation => {
+            format!("Incomplete equation")
+        }
     }
 }

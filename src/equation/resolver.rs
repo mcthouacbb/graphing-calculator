@@ -4,19 +4,22 @@ use crate::equation::{
 
 pub mod resolve_error;
 
-pub fn check_identifiers(expr: &Expr) -> Result<(), ResolveError> {
+pub fn check_identifiers(expr: &Expr, expected: &[&str]) -> Result<(), ResolveError> {
     match expr {
         Expr::Binary(binary_expr) => {
-            check_identifiers(binary_expr.left())?;
-            check_identifiers(binary_expr.right())?;
+            check_identifiers(binary_expr.left(), expected)?;
+            check_identifiers(binary_expr.right(), expected)?;
         }
         Expr::Unary(unary_expr) => {
-            check_identifiers(unary_expr.right())?;
+            check_identifiers(unary_expr.right(), expected)?;
         }
         Expr::Var(var_expr) => {
-            if var_expr.name() != "x" && var_expr.name() != "y" {
-                return Err(ResolveError::UnknownIdentifier(var_expr.name().to_string()));
+            for identifier in expected {
+                if var_expr.name() == *identifier {
+                    return Ok(());
+                }
             }
+            return Err(ResolveError::UnknownIdentifier(var_expr.name().to_string()));
         }
         Expr::Const(_) => (),
     }
@@ -26,15 +29,18 @@ pub fn check_identifiers(expr: &Expr) -> Result<(), ResolveError> {
 pub fn resolve_equation(expr_or_equation: ExprOrEquation) -> Result<Equation, ResolveError> {
     match expr_or_equation {
         ExprOrEquation::Expr(expr) => {
-            check_identifiers(&expr)?;
+            if check_identifiers(&expr, &["x"]).is_err() {
+                return Err(ResolveError::IncompleteEquation);
+            }
+
             Ok(Equation {
                 left: expr,
                 right: Expr::new_var("y".to_owned()),
             })
         }
         ExprOrEquation::Equation(left, right) => {
-            check_identifiers(&left)?;
-            check_identifiers(&right)?;
+            check_identifiers(&left, &["x", "y"])?;
+            check_identifiers(&right, &["x", "y"])?;
             Ok(Equation { left, right })
         }
     }

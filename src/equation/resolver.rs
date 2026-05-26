@@ -33,15 +33,26 @@ pub fn resolve_equation(expr_or_equation: ExprOrEquation) -> Result<Equation, Re
                 return Err(ResolveError::IncompleteEquation);
             }
 
-            Ok(Equation {
-                left: expr,
-                right: Expr::new_var("y".to_owned()),
-            })
+            Ok(Equation::new_explicit(expr))
         }
         ExprOrEquation::Equation(left, right) => {
             check_identifiers(&left, &["x", "y"])?;
             check_identifiers(&right, &["x", "y"])?;
-            Ok(Equation { left, right })
+
+            if let Expr::Var(left_var) = &left
+                && left_var.name() == "y"
+                && check_identifiers(&right, &["x"]).is_ok()
+            {
+                return Ok(Equation::new_explicit(right));
+            }
+
+            if let Expr::Var(right_var) = &right
+                && right_var.name() == "y"
+                && check_identifiers(&left, &["x"]).is_ok()
+            {
+                return Ok(Equation::new_explicit(left));
+            }
+            Err(ResolveError::UnsupportedEquation)
         }
     }
 }

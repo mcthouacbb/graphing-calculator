@@ -26,7 +26,10 @@ pub fn render(
     }
     for equation in equations {
         graph_equation(camera, width, height, framebuffer, |x, y| {
-            equation.calc_residual(x, y)
+            // TEMPORARY
+            match equation {
+                Equation::Explicit(explicit) => explicit.calc(x) - y,
+            }
         });
     }
 }

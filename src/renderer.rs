@@ -2,7 +2,7 @@ use crate::{
     app::{camera::Camera, settings::Settings},
     equation::Equation,
     renderer::{
-        graph::graph_equation,
+        graph::graph_explicit_equation,
         structure::{fmt_tick_pos, tick_width},
     },
 };
@@ -16,21 +16,15 @@ pub fn render(
     camera: &Camera,
     width: usize,
     height: usize,
-    framebuffer: &mut Vec<egui::Color32>,
+    ui: &mut egui::Ui,
     equations: &[&Equation],
 ) {
-    for y in 0..height {
-        for x in 0..width {
-            framebuffer[y * width + x] = egui::Color32::WHITE;
-        }
-    }
     for equation in equations {
-        graph_equation(camera, width, height, framebuffer, |x, y| {
-            // TEMPORARY
-            match equation {
-                Equation::Explicit(explicit) => explicit.calc(x) - y,
+        match equation {
+            Equation::Explicit(explicit) => {
+                graph_explicit_equation(camera, width, height, ui, explicit);
             }
-        });
+        }
     }
 }
 

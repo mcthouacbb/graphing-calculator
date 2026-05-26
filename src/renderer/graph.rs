@@ -1,33 +1,38 @@
-use crate::app::camera::Camera;
+use crate::{app::camera::Camera, equation::explicit::ExplicitEquation};
 
 use eframe::egui;
 
-pub fn graph_equation<E: Fn(f64, f64) -> f64>(
+pub fn graph_explicit_equation(
     camera: &Camera,
     width: usize,
     height: usize,
-    framebuffer: &mut Vec<egui::Color32>,
-    equation: E,
+    ui: &mut egui::Ui,
+    equation: &ExplicitEquation,
 ) {
-    for y in 0..height {
-        for x in 0..width {
-            let mut nonnegative = false;
-            let mut nonpositive = false;
-            for corner in 0..4 {
-                let cx = (x + corner % 2) as f64 / width as f64;
-                let cy = (y + corner / 2) as f64 / height as f64;
-                let (wx, wy) = camera.screen_to_world(cx, cy);
-                let sign = equation(wx, wy);
-                if sign >= 0.0 {
-                    nonnegative = true;
-                }
-                if sign <= 0.0 {
-                    nonpositive = true;
-                }
-            }
-            if nonnegative && nonpositive {
-                framebuffer[y * width + x] = egui::Color32::BLACK;
-            }
+    let mut prev = None;
+
+    for x in 0..width {
+        let wx = camera.screen_to_world_x((x as f64 + 0.5) / width as f64);
+        let wy = equation.calc(wx);
+
+        if let Some((prev_wx, prev_wy)) = prev {
+            let (cx, cy) = camera.world_to_screen(wx, wy);
+            let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
+
+            ui.painter().line_segment(
+                [
+                    ui.max_rect().min
+                        + egui::vec2(
+                            width as f32 * prev_cx as f32,
+                            height as f32 * prev_cy as f32,
+                        ),
+                    ui.max_rect().min
+                        + egui::vec2(width as f32 * cx as f32, height as f32 * cy as f32),
+                ],
+                egui::Stroke::new(2.0, egui::Color32::BLACK),
+            );
         }
+
+        prev = Some((wx, wy))
     }
 }

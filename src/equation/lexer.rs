@@ -89,6 +89,7 @@ impl<'a> Lexer<'a> {
                     self.advance();
                 }
 
+                // TODO: require at least one number for this to be a valid literal
                 while self.peek().is_some_and(|chr| chr.is_ascii_digit()) {
                     self.advance();
                 }

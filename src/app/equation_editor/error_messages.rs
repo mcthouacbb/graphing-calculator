@@ -17,15 +17,14 @@ pub fn parser_error_message(parse_error: &ParseError) -> String {
     match parse_error {
         ParseError::ExpectedPrimary(actual) => {
             if let Some(token) = actual {
-                // TODO: add function call
                 format!(
-                    "Expected a number, variable, or parenthesized expression at position {}. Instead got '{}'",
+                    "Expected a number, variable, function call, or parenthesized expression at position {}. Instead got '{}'",
                     token.positions().0,
                     token.str()
                 )
             } else {
                 format!(
-                    "Expected a number, variable, or parenthesized expression. Instead got end of input"
+                    "Expected a number, variable, function call, or parenthesized expression. Instead got end of input"
                 )
             }
         }
@@ -67,9 +66,12 @@ pub fn parser_error_message(parse_error: &ParseError) -> String {
 
 pub fn resolver_error_message(resolve_error: &ResolveError) -> String {
     match resolve_error {
-        ResolveError::UnknownIdentifier(identifier) => {
+        ResolveError::UnknownVariable(identifier) => {
             // TODO: track where the identifier came from
-            format!("Unknown identifier '{}'", identifier)
+            format!("Unknown variable '{}'", identifier)
+        }
+        ResolveError::UnknownFunction(identifier) => {
+            format!("Unknown function '{}'", identifier)
         }
         ResolveError::IncompleteEquation => {
             format!("Incomplete equation")

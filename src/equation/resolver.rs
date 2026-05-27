@@ -2,7 +2,10 @@ use crate::equation::{
     Equation,
     expr::Expr,
     parser::ExprOrEquation,
-    resolver::{builtins::resolve_builtin_constants, resolve_error::ResolveError},
+    resolver::{
+        builtins::{resolve_builtin_constants, resolve_builtin_functions},
+        resolve_error::ResolveError,
+    },
 };
 
 mod builtins;
@@ -17,13 +20,16 @@ pub fn check_identifiers(expr: &Expr, expected: &[&str]) -> Result<(), ResolveEr
         Expr::Unary(unary_expr) => {
             check_identifiers(unary_expr.right(), expected)?;
         }
+        Expr::Func(func_expr) => {
+            check_identifiers(func_expr.input(), expected)?;
+        }
         Expr::Var(var_expr) => {
             for identifier in expected {
                 if var_expr.name() == *identifier {
                     return Ok(());
                 }
             }
-            return Err(ResolveError::UnknownIdentifier(var_expr.name().to_string()));
+            return Err(ResolveError::UnknownVariable(var_expr.name().to_string()));
         }
         Expr::Const(_) => (),
     }
@@ -35,6 +41,8 @@ pub fn resolve_equation(expr_or_equation: ExprOrEquation) -> Result<Equation, Re
         ExprOrEquation::Expr(mut expr) => {
             resolve_builtin_constants(&mut expr);
 
+            resolve_builtin_functions(&mut expr)?;
+
             if check_identifiers(&expr, &["x"]).is_err() {
                 return Err(ResolveError::IncompleteEquation);
             }
@@ -44,6 +52,9 @@ pub fn resolve_equation(expr_or_equation: ExprOrEquation) -> Result<Equation, Re
         ExprOrEquation::Equation(mut left, mut right) => {
             resolve_builtin_constants(&mut left);
             resolve_builtin_constants(&mut right);
+
+            resolve_builtin_functions(&mut left)?;
+            resolve_builtin_functions(&mut right)?;
 
             check_identifiers(&left, &["x", "y"])?;
             check_identifiers(&right, &["x", "y"])?;

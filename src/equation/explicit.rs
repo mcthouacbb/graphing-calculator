@@ -32,6 +32,10 @@ impl ExplicitEquation {
                     UnaryOp::Neg => -right,
                 }
             }
+            Expr::Func(func_expr) => {
+                let input = Self::calc_impl(func_expr.input(), x);
+                func_expr.func()(input)
+            }
             Expr::Const(const_expr) => const_expr.value(),
             Expr::Var(var_expr) => {
                 assert!(var_expr.name() == "x");

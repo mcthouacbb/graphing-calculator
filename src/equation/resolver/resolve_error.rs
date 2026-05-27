@@ -2,4 +2,5 @@
 pub enum ResolveError {
     UnknownIdentifier(String),
     IncompleteEquation,
+    UnsupportedEquation,
 }

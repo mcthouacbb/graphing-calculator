@@ -74,5 +74,8 @@ pub fn resolver_error_message(resolve_error: &ResolveError) -> String {
         ResolveError::IncompleteEquation => {
             format!("Incomplete equation")
         }
+        ResolveError::UnsupportedEquation => {
+            format!("Implicit equations are currently unsupported")
+        }
     }
 }

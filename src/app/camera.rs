@@ -15,20 +15,30 @@ impl Camera {
         }
     }
 
+    pub fn screen_to_world_x(&self, x: f64) -> f64 {
+        self.left * (1.0 - x) + self.right * x
+    }
+
+    pub fn screen_to_world_y(&self, y: f64) -> f64 {
+        // y coordinates are flipped
+        self.bottom * y + self.top * (1.0 - y)
+    }
+
     pub fn screen_to_world(&self, x: f64, y: f64) -> (f64, f64) {
-        (
-            self.left * (1.0 - x) + self.right * x,
-            // y coordinates are flipped
-            self.bottom * y + self.top * (1.0 - y),
-        )
+        (self.screen_to_world_x(x), self.screen_to_world_y(y))
+    }
+
+    pub fn world_to_screen_x(&self, x: f64) -> f64 {
+        (x - self.left) / (self.right - self.left)
+    }
+
+    pub fn world_to_screen_y(&self, y: f64) -> f64 {
+        // y coordinates are flipped
+        (y - self.top) / (self.bottom - self.top)
     }
 
     pub fn world_to_screen(&self, x: f64, y: f64) -> (f64, f64) {
-        (
-            (x - self.left) / (self.right - self.left),
-            // y coordinates are flipped
-            (y - self.top) / (self.bottom - self.top),
-        )
+        (self.world_to_screen_x(x), self.world_to_screen_y(y))
     }
 
     pub fn translate(&mut self, delta_x: f64, delta_y: f64) {

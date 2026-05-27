@@ -43,7 +43,7 @@ pub fn render_segment(
 
     let subdivide = if cx_diff < 0.01 {
         false
-    } else if cy_diff > 8.0 {
+    } else if !prev_wy.is_finite() || !wy.is_finite() || cy_diff > 8.0 {
         true
     } else {
         // TODO: use interval arithmetic to estimate aliasing/discontinuity
@@ -56,16 +56,20 @@ pub fn render_segment(
         .abs()
             * height as f64;
 
-        mid_cy_diff >= 0.5
+        mid_cy_diff >= 0.5 || mid_cy_diff.is_nan()
     };
 
     if subdivide {
         let mid_wx = (prev_wx + wx) / 2.0;
         let mid_wy = equation.calc(mid_wx);
-        render_segment(
-            camera, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
-        );
-        render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
+        if prev_wy.is_finite() || mid_wx.is_finite() {
+            render_segment(
+                camera, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
+            );
+        }
+        if mid_wy.is_finite() || wy.is_finite() {
+            render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
+        }
     } else {
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);

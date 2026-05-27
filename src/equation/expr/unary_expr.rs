@@ -20,6 +20,10 @@ impl UnaryExpr {
         self.right.as_ref()
     }
 
+    pub fn right_mut(&mut self) -> &mut Expr {
+        self.right.as_mut()
+    }
+
     pub fn op(&self) -> UnaryOp {
         self.op
     }

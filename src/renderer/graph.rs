@@ -79,7 +79,7 @@ pub fn render_segment(
                     ),
                 ui.max_rect().min + egui::vec2(width as f32 * cx as f32, height as f32 * cy as f32),
             ],
-            egui::Stroke::new(2.0, egui::Color32::BLACK),
+            egui::Stroke::new(2.0, egui::Color32::RED),
         );
     }
 }

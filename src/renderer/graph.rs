@@ -70,7 +70,7 @@ pub fn render_segment(
         if mid_wy.is_finite() || wy.is_finite() {
             render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
         }
-    } else {
+    } else if wy.is_finite() && prev_wy.is_finite() {
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
 

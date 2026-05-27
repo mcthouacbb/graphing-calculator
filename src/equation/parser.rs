@@ -131,11 +131,22 @@ impl<'a, 'b> Parser<'a, 'b> {
             let right = self.parse_neg()?;
             Ok(Expr::new_unary(Box::new(right), UnaryOp::Neg))
         } else {
-            self.parse_primary()
+            self.parse_fn()
         }
     }
 
-    // TODO: when function calls are added, make sure to change the error messages
+    fn parse_fn(&mut self) -> Result<Expr, ParseError<'a>> {
+        let result = self.parse_primary()?;
+        if let Expr::Var(var_expr) = &result
+            && self.match_tok(TokenKind::OpenParen)
+        {
+            let input = self.parse_add_sub()?;
+            self.expect(TokenKind::CloseParen)?;
+            Ok(Expr::new_func(Box::new(input), var_expr.name().to_string()))
+        } else {
+            Ok(result)
+        }
+    }
 
     fn parse_primary(&mut self) -> Result<Expr, ParseError<'a>> {
         if self.match_tok(TokenKind::Literal) {

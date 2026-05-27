@@ -1,6 +1,7 @@
 #[derive(Debug, Clone)]
 pub enum ResolveError {
-    UnknownIdentifier(String),
+    UnknownVariable(String),
+    UnknownFunction(String),
     IncompleteEquation,
     UnsupportedEquation,
 }

@@ -29,6 +29,14 @@ impl BinaryExpr {
         self.right.as_ref()
     }
 
+    pub fn left_mut(&mut self) -> &mut Expr {
+        self.left.as_mut()
+    }
+
+    pub fn right_mut(&mut self) -> &mut Expr {
+        self.right.as_mut()
+    }
+
     pub fn op(&self) -> BinaryOp {
         self.op
     }

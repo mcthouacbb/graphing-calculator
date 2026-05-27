@@ -43,14 +43,14 @@ pub fn render_graph_structure(
     if origin_y >= 0.0 && origin_y <= 1.0 {
         ui.painter().hline(
             ui.max_rect().x_range(),
-            min_y + (origin_y * height as f64 - 0.5) as f32,
+            min_y + (origin_y * height as f64) as f32,
             egui::Stroke::new(2.5, egui::Color32::BLACK),
         );
     }
 
     if origin_x >= 0.0 && origin_x <= 1.0 {
         ui.painter().vline(
-            min_x + (origin_x * width as f64 - 0.5) as f32,
+            min_x + (origin_x * width as f64) as f32,
             ui.max_rect().y_range(),
             egui::Stroke::new(2.5, egui::Color32::BLACK),
         );
@@ -68,7 +68,7 @@ pub fn render_graph_structure(
         }
 
         ui.painter().vline(
-            min_x + (tick_screen_x * width as f64 - 0.5) as f32,
+            min_x + (tick_screen_x * width as f64) as f32,
             ui.max_rect().y_range(),
             egui::Stroke::new(1.5, egui::Color32::GRAY),
         );
@@ -80,8 +80,8 @@ pub fn render_graph_structure(
             )
         });
         let target_pos = egui::pos2(
-            min_x + (tick_screen_x * width as f64 - 0.5) as f32 - text_layout.size().x / 2.0,
-            min_y + (origin_y * height as f64 - 0.5) as f32 - text_layout.size().y,
+            min_x + (tick_screen_x * width as f64) as f32 - text_layout.size().x / 2.0,
+            min_y + (origin_y * height as f64) as f32 - text_layout.size().y,
         );
 
         let pos = egui::pos2(
@@ -110,7 +110,7 @@ pub fn render_graph_structure(
 
         ui.painter().hline(
             ui.max_rect().x_range(),
-            min_y + (tick_screen_y * height as f64 - 0.5) as f32,
+            min_y + (tick_screen_y * height as f64) as f32,
             egui::Stroke::new(1.5, egui::Color32::GRAY),
         );
 
@@ -122,8 +122,8 @@ pub fn render_graph_structure(
             )
         });
         let target_pos = egui::pos2(
-            min_x + (origin_x * width as f64 - 0.5) as f32 + 5.0,
-            min_y + (tick_screen_y * height as f64 - 0.5) as f32 - text_layout.size().y,
+            min_x + (origin_x * width as f64) as f32 + 5.0,
+            min_y + (tick_screen_y * height as f64) as f32 - text_layout.size().y,
         );
 
         let pos = egui::pos2(

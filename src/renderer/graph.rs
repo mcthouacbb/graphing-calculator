@@ -56,7 +56,7 @@ pub fn render_segment(
         .abs()
             * height as f64;
 
-        mid_cy_diff >= 0.5 || mid_cy_diff.is_nan()
+        mid_cy_diff >= 0.25 || !mid_cy_diff.is_finite()
     };
 
     if subdivide {

@@ -1,9 +1,14 @@
-use crate::{app::camera::Camera, equation::explicit::ExplicitEquation, interval::Interval};
+use crate::{
+    app::{camera::Camera, settings::Settings},
+    equation::explicit::ExplicitEquation,
+    interval::Interval,
+};
 
 use eframe::egui;
 
 pub fn graph_explicit_equation(
     camera: &Camera,
+    settings: &Settings,
     width: usize,
     height: usize,
     ui: &mut egui::Ui,
@@ -17,7 +22,7 @@ pub fn graph_explicit_equation(
 
         if let Some((prev_wx, prev_wy)) = prev {
             render_segment(
-                camera, width, height, ui, equation, prev_wx, prev_wy, wx, wy,
+                camera, settings, width, height, ui, equation, prev_wx, prev_wy, wx, wy,
             );
         }
 
@@ -27,6 +32,7 @@ pub fn graph_explicit_equation(
 
 pub fn render_segment(
     camera: &Camera,
+    settings: &Settings,
     width: usize,
     height: usize,
     ui: &mut egui::Ui,
@@ -68,11 +74,13 @@ pub fn render_segment(
         let mid_wy = equation.calc(mid_wx);
         if prev_wy.is_finite() || mid_wx.is_finite() {
             render_segment(
-                camera, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
+                camera, settings, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
             );
         }
         if mid_wy.is_finite() || wy.is_finite() {
-            render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
+            render_segment(
+                camera, settings, width, height, ui, equation, mid_wx, mid_wy, wx, wy,
+            );
         }
     } else if wy.is_finite()
         && prev_wy.is_finite()
@@ -81,6 +89,14 @@ pub fn render_segment(
     {
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
+
+        if settings.show_debug() {
+            ui.painter().vline(
+                ui.max_rect().min.x + width as f32 * cx as f32,
+                ui.max_rect().y_range(),
+                egui::Stroke::new(0.5, egui::Color32::from_rgba_unmultiplied(0, 0, 139, 128)),
+            );
+        }
 
         ui.painter().line_segment(
             [

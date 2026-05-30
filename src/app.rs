@@ -92,7 +92,7 @@ impl eframe::App for App {
                             equations.push(equation);
                         }
                     }
-                    renderer::render(&self.camera, width, height, ui, &equations);
+                    renderer::render(&self.camera, &self.settings, width, height, ui, &equations);
                 }
 
                 ui.allocate_ui_with_layout(

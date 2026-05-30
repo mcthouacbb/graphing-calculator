@@ -35,6 +35,7 @@ pub struct Settings {
     x_axis: AxisSettings,
     y_axis: AxisSettings,
     render_grid: bool,
+    show_debug: bool,
 }
 
 impl Default for Settings {
@@ -48,6 +49,7 @@ impl Default for Settings {
             x_axis: AxisSettings::default(),
             y_axis: AxisSettings::default(),
             render_grid: true,
+            show_debug: false,
         }
     }
 }
@@ -73,6 +75,10 @@ impl Settings {
             ui.checkbox(&mut self.render_grid, "Show grid lines");
             Self::axis_settings(ui, &mut self.x_axis, "x");
             Self::axis_settings(ui, &mut self.y_axis, "y");
+
+            ui.add_space(10.0);
+
+            ui.checkbox(&mut self.show_debug, "Show debug view");
         });
     }
 
@@ -86,6 +92,10 @@ impl Settings {
 
     pub fn render_grid(&self) -> bool {
         self.render_grid
+    }
+
+    pub fn show_debug(&self) -> bool {
+        self.show_debug
     }
 
     fn axis_settings(ui: &mut egui::Ui, axis: &mut AxisSettings, name: &str) {

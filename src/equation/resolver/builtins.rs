@@ -1,6 +1,9 @@
 use std::f64;
 
-use crate::equation::{expr::Expr, resolver::resolve_error::ResolveError};
+use crate::{
+    equation::{expr::Expr, resolver::resolve_error::ResolveError},
+    interval::Interval,
+};
 
 const BUILTIN_CONSTS: [(&str, f64); 2] = [("e", f64::consts::E), ("pi", f64::consts::PI)];
 
@@ -28,11 +31,11 @@ pub fn resolve_builtin_constants(expr: &mut Expr) {
     }
 }
 
-const BUILTIN_FUNCS: [(&str, fn(f64) -> f64); 4] = [
-    ("sin", f64::sin),
-    ("cos", f64::cos),
-    ("tan", f64::tan),
-    ("ln", f64::ln),
+const BUILTIN_FUNCS: [(&str, fn(f64) -> f64, fn(&Interval) -> Interval); 4] = [
+    ("sin", f64::sin, Interval::sin),
+    ("cos", f64::cos, Interval::cos),
+    ("tan", f64::tan, Interval::tan),
+    ("ln", f64::ln, Interval::ln),
 ];
 
 pub fn resolve_builtin_functions(expr: &mut Expr) -> Result<(), ResolveError> {
@@ -46,9 +49,9 @@ pub fn resolve_builtin_functions(expr: &mut Expr) -> Result<(), ResolveError> {
         }
         Expr::Func(func_expr) => {
             resolve_builtin_functions(func_expr.input_mut())?;
-            for &(name, func) in &BUILTIN_FUNCS {
+            for &(name, func, interval_func) in &BUILTIN_FUNCS {
                 if func_expr.name() == name {
-                    func_expr.set_func(func);
+                    func_expr.set_func(func, interval_func);
                     return Ok(());
                 }
             }

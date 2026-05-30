@@ -149,6 +149,50 @@ impl Interval {
         )
     }
 
+    pub fn powf(&self, rhs: f64) -> Self {
+        if self.empty() {
+            return Self::EMPTY;
+        }
+
+        if rhs == 0.0 {
+            return Self::new_impl(1.0, 1.0, self.continuous);
+        }
+
+        if rhs.fract() == 0.0 {
+            // integer power
+            let a = self.lower().powf(rhs);
+            let b = self.upper().powf(rhs);
+
+            if (rhs / 2.0).fract() == 0.0 {
+                // even integer power
+                if self.lower() <= 0.0 && self.upper() >= 0.0 {
+                    Self::new_impl(0.0, a.max(b), self.continuous)
+                } else {
+                    Self::new_impl(a.min(b), a.max(b), self.continuous)
+                }
+            } else {
+                // odd integer power
+                Self::new_impl(a, b, self.continuous)
+            }
+        } else {
+            if self.upper() >= 0.0 {
+                let a = self.upper().powf(rhs);
+                let b = if self.lower() <= 0.0 && rhs < 0.0 {
+                    f64::INFINITY
+                } else {
+                    self.lower().max(0.0).powf(rhs)
+                };
+                Self::new_impl(
+                    a.min(b),
+                    a.max(b),
+                    self.continuous && self.lower() >= 0.0 && (self.lower() > 0.0 || rhs > 0.0),
+                )
+            } else {
+                Self::EMPTY
+            }
+        }
+    }
+
     // pow is only defined on ((0, inf] x [-inf, inf]) U ([0, inf] x [0, inf])
     // equivalently pow is only defined if the base is positive or the base is nonnegative and the exponent is nonnegative
     pub fn pow(&self, rhs: &Self) -> Self {

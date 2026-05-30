@@ -19,6 +19,9 @@ pub fn resolve_builtin_constants(expr: &mut Expr) {
         Expr::Func(func_expr) => {
             resolve_builtin_constants(func_expr.input_mut());
         }
+        Expr::ConstPowExpr(const_pow_expr) => {
+            resolve_builtin_constants(const_pow_expr.base_mut());
+        }
         Expr::Var(var_expr) => {
             for &(name, value) in &BUILTIN_CONSTS {
                 if var_expr.name() == name {

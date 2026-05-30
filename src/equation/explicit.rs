@@ -43,6 +43,10 @@ impl ExplicitEquation {
                 let input = Self::calc_impl(func_expr.input(), x);
                 func_expr.func()(input)
             }
+            Expr::ConstPowExpr(const_pow_expr) => {
+                let base = Self::calc_impl(const_pow_expr.base(), x);
+                base.powf(const_pow_expr.power())
+            }
             Expr::Const(const_expr) => const_expr.value(),
             Expr::Var(var_expr) => {
                 assert!(var_expr.name() == "x");
@@ -73,6 +77,10 @@ impl ExplicitEquation {
             Expr::Func(func_expr) => {
                 let input = Self::calc_interval_impl(func_expr.input(), interval);
                 func_expr.interval_func()(&input)
+            }
+            Expr::ConstPowExpr(const_pow_expr) => {
+                let base = Self::calc_interval_impl(const_pow_expr.base(), interval);
+                base.powf(const_pow_expr.power())
             }
             Expr::Const(const_expr) => Interval::new(const_expr.value(), const_expr.value()),
             Expr::Var(var_expr) => {

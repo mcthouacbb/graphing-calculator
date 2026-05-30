@@ -23,6 +23,9 @@ pub fn check_identifiers(expr: &Expr, expected: &[&str]) -> Result<(), ResolveEr
         Expr::Func(func_expr) => {
             check_identifiers(func_expr.input(), expected)?;
         }
+        Expr::ConstPowExpr(const_pow_expr) => {
+            check_identifiers(const_pow_expr.base(), expected)?;
+        }
         Expr::Var(var_expr) => {
             for identifier in expected {
                 if var_expr.name() == *identifier {

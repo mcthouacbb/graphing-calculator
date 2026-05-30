@@ -112,10 +112,21 @@ impl<'a, 'b> Parser<'a, 'b> {
         Ok(result)
     }
 
+    fn parse_neg(&mut self) -> Result<Expr, ParseError<'a>> {
+        if self.match_tok(TokenKind::Minus) {
+            let right = self.parse_neg()?;
+            Ok(Expr::new_unary(Box::new(right), UnaryOp::Neg))
+        } else {
+            self.parse_pow()
+        }
+    }
+
     fn parse_pow(&mut self) -> Result<Expr, ParseError<'a>> {
-        let result = self.parse_neg()?;
+        let result = self.parse_fn()?;
         if self.match_tok(TokenKind::Caret) {
-            let right = self.parse_pow()?;
+            // calling parse_neg() instead of parse_pow() here to allow
+            // expressions like e^-x^2 to be parsed as e^(-(x^2))
+            let right = self.parse_neg()?;
             if let Expr::Const(right_const) = right {
                 Ok(Expr::new_const_pow(Box::new(result), right_const.value()))
             } else {
@@ -127,15 +138,6 @@ impl<'a, 'b> Parser<'a, 'b> {
             }
         } else {
             Ok(result)
-        }
-    }
-
-    fn parse_neg(&mut self) -> Result<Expr, ParseError<'a>> {
-        if self.match_tok(TokenKind::Minus) {
-            let right = self.parse_neg()?;
-            Ok(Expr::new_unary(Box::new(right), UnaryOp::Neg))
-        } else {
-            self.parse_fn()
         }
     }
 

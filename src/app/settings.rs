@@ -2,23 +2,30 @@ use crate::app::{camera::Camera, widgets::float_input};
 
 use eframe::egui;
 
-struct AxisSettings {
-    render: bool,
+pub struct AxisSettings {
+    render_axis: bool,
     render_ticks: bool,
-    render_grid: bool,
+}
+
+impl AxisSettings {
+    pub fn render_axis(&self) -> bool {
+        self.render_axis
+    }
+
+    pub fn render_ticks(&self) -> bool {
+        self.render_ticks
+    }
 }
 
 impl Default for AxisSettings {
     fn default() -> Self {
         Self {
-            render: true,
+            render_axis: true,
             render_ticks: true,
-            render_grid: true,
         }
     }
 }
 
-#[derive(Default)]
 pub struct Settings {
     camera_left: String,
     camera_right: String,
@@ -27,6 +34,22 @@ pub struct Settings {
 
     x_axis: AxisSettings,
     y_axis: AxisSettings,
+    render_grid: bool,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            camera_left: String::new(),
+            camera_right: String::new(),
+            camera_bottom: String::new(),
+            camera_top: String::new(),
+
+            x_axis: AxisSettings::default(),
+            y_axis: AxisSettings::default(),
+            render_grid: true,
+        }
+    }
 }
 
 impl Settings {
@@ -47,15 +70,27 @@ impl Settings {
                 float_input(&mut cols[1], &mut self.camera_top, &mut camera.top);
             });
 
+            ui.checkbox(&mut self.render_grid, "Show grid lines");
             Self::axis_settings(ui, &mut self.x_axis, "x");
             Self::axis_settings(ui, &mut self.y_axis, "y");
         });
     }
 
+    pub fn x_axis(&self) -> &AxisSettings {
+        &self.x_axis
+    }
+
+    pub fn y_axis(&self) -> &AxisSettings {
+        &self.y_axis
+    }
+
+    pub fn render_grid(&self) -> bool {
+        self.render_grid
+    }
+
     fn axis_settings(ui: &mut egui::Ui, axis: &mut AxisSettings, name: &str) {
         ui.label(format!("{} axis", name));
-        ui.checkbox(&mut axis.render, "Show axis");
+        ui.checkbox(&mut axis.render_axis, "Show axis");
         ui.checkbox(&mut axis.render_ticks, "Show labels");
-        ui.checkbox(&mut axis.render_grid, "Show grid lines");
     }
 }

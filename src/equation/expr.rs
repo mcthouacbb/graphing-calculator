@@ -1,6 +1,7 @@
 use crate::equation::expr::{
     binary_expr::{BinaryExpr, BinaryOp},
     const_expr::ConstExpr,
+    const_pow_expr::ConstPowExpr,
     func_expr::FuncExpr,
     unary_expr::{UnaryExpr, UnaryOp},
     var_expr::VarExpr,
@@ -8,6 +9,7 @@ use crate::equation::expr::{
 
 pub mod binary_expr;
 pub mod const_expr;
+pub mod const_pow_expr;
 pub mod func_expr;
 pub mod unary_expr;
 pub mod var_expr;
@@ -17,6 +19,7 @@ pub enum Expr {
     Binary(BinaryExpr),
     Unary(UnaryExpr),
     Func(FuncExpr),
+    ConstPowExpr(ConstPowExpr),
     Var(VarExpr),
     Const(ConstExpr),
 }
@@ -32,6 +35,10 @@ impl Expr {
 
     pub fn new_func(input: Box<Expr>, name: String) -> Self {
         Self::Func(FuncExpr::new(input, name))
+    }
+
+    pub fn new_const_pow(base: Box<Expr>, power: f64) -> Self {
+        Self::ConstPowExpr(ConstPowExpr::new(base, power))
     }
 
     pub fn new_var(name: String) -> Self {

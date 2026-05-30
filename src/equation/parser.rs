@@ -116,11 +116,15 @@ impl<'a, 'b> Parser<'a, 'b> {
         let result = self.parse_neg()?;
         if self.match_tok(TokenKind::Caret) {
             let right = self.parse_pow()?;
-            Ok(Expr::new_binary(
-                Box::new(result),
-                Box::new(right),
-                BinaryOp::Pow,
-            ))
+            if let Expr::Const(right_const) = right {
+                Ok(Expr::new_const_pow(Box::new(result), right_const.value()))
+            } else {
+                Ok(Expr::new_binary(
+                    Box::new(result),
+                    Box::new(right),
+                    BinaryOp::Pow,
+                ))
+            }
         } else {
             Ok(result)
         }

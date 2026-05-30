@@ -2,6 +2,7 @@ use crate::app::App;
 
 mod app;
 mod equation;
+mod interval;
 mod renderer;
 
 fn main() {

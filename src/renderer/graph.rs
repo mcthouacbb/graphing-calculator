@@ -1,4 +1,4 @@
-use crate::{app::camera::Camera, equation::explicit::ExplicitEquation};
+use crate::{app::camera::Camera, equation::explicit::ExplicitEquation, interval::Interval};
 
 use eframe::egui;
 
@@ -41,22 +41,26 @@ pub fn render_segment(
     let cy_diff =
         (camera.world_to_screen_y(wy) - camera.world_to_screen_y(prev_wy)).abs() * height as f64;
 
+    let x_interval = Interval::new(prev_wx, wx);
+    let y_interval = equation.calc_interval(&x_interval);
+
+    let mid_wx = (prev_wx + wx) / 2.0;
+    let actual_mid_wy = equation.calc(mid_wx);
+    let expected_mid_wy = (prev_wy + wy) / 2.0;
+
+    let mid_cy_diff =
+        (camera.world_to_screen_y(actual_mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
+            * height as f64;
+
     let subdivide = if cx_diff < 0.01 {
         false
     } else if !prev_wy.is_finite() || !wy.is_finite() || cy_diff > 8.0 {
         true
     } else {
-        // TODO: use interval arithmetic to estimate aliasing/discontinuity
-        let mid_wx = (prev_wx + wx) / 2.0;
-        let actual_mid_wy = equation.calc(mid_wx);
-        let expected_mid_wy = (prev_wy + wy) / 2.0;
-
-        let mid_cy_diff = (camera.world_to_screen_y(actual_mid_wy)
-            - camera.world_to_screen_y(expected_mid_wy))
-        .abs()
-            * height as f64;
-
-        mid_cy_diff >= 0.25 || !mid_cy_diff.is_finite()
+        mid_cy_diff >= 0.25
+            || !mid_cy_diff.is_finite()
+            || !y_interval.is_finite()
+            || !y_interval.continuous()
     };
 
     if subdivide {
@@ -70,7 +74,11 @@ pub fn render_segment(
         if mid_wy.is_finite() || wy.is_finite() {
             render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
         }
-    } else if wy.is_finite() && prev_wy.is_finite() {
+    } else if wy.is_finite()
+        && prev_wy.is_finite()
+        && y_interval.is_finite()
+        && y_interval.continuous()
+    {
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
 

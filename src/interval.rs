@@ -163,16 +163,22 @@ impl Interval {
             let a = self.lower().powf(rhs);
             let b = self.upper().powf(rhs);
 
-            if (rhs / 2.0).fract() == 0.0 {
+            let (min, max) = if (rhs / 2.0).fract() == 0.0 {
                 // even integer power
                 if self.lower() <= 0.0 && self.upper() >= 0.0 {
-                    Self::new_impl(0.0, a.max(b), self.continuous)
+                    (0.0, a.max(b))
                 } else {
-                    Self::new_impl(a.min(b), a.max(b), self.continuous)
+                    (a.min(b), a.max(b))
                 }
             } else {
                 // odd integer power
-                Self::new_impl(a, b, self.continuous)
+                (a, b)
+            };
+
+            if min == f64::INFINITY || max == f64::NEG_INFINITY {
+                Self::EMPTY
+            } else {
+                Self::new_impl(min, max, self.continuous)
             }
         } else {
             if self.upper() >= 0.0 {

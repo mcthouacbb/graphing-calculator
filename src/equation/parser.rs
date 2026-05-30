@@ -94,7 +94,7 @@ impl<'a, 'b> Parser<'a, 'b> {
     }
 
     fn parse_mul_div(&mut self) -> Result<Expr, ParseError<'a>> {
-        let mut result = self.parse_pow()?;
+        let mut result = self.parse_neg()?;
         loop {
             let op = if self.match_tok(TokenKind::Star) {
                 BinaryOp::Mul
@@ -104,7 +104,7 @@ impl<'a, 'b> Parser<'a, 'b> {
                 break;
             };
 
-            let right = self.parse_pow()?;
+            let right = self.parse_neg()?;
 
             result = Expr::new_binary(Box::new(result), Box::new(right), op);
         }

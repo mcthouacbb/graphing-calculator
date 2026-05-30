@@ -53,11 +53,15 @@ impl eframe::App for App {
         egui::CentralPanel::default()
             .frame(egui::Frame::NONE)
             .show_inside(ui, |ui| {
+                let response =
+                    ui.interact(ui.max_rect(), ui.id().with("drag"), egui::Sense::drag());
+
+                if response.dragged_by(egui::PointerButton::Primary) {
+                    let delta = response.drag_delta() / ui.max_rect().size();
+                    self.camera.translate(delta.x as f64, delta.y as f64);
+                }
+
                 ui.input(|input| {
-                    if input.pointer.primary_down() {
-                        let delta = input.pointer.delta() / ui.max_rect().size();
-                        self.camera.translate(delta.x as f64, delta.y as f64);
-                    }
                     if let Some(pointer_pos) = input.pointer.latest_pos() {
                         let pos = (pointer_pos - ui.max_rect().min) / ui.max_rect().size();
                         self.camera.zoom(

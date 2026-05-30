@@ -141,6 +141,74 @@ impl Interval {
         Self::new(min, self.max().ln(), self.min() > 0.0 && self.continuous)
     }
 
+    // pow is only defined on ((0, inf] x [-inf, inf]) U ([0, inf] x [0, inf])
+    // equivalently pow is only defined if the base is positive or the base is nonnegative and the exponent is nonnegative
+    fn pow(&self, rhs: &Self) -> Self {
+        if self.empty() || rhs.empty() || self.max < 0.0 {
+            return Self::EMPTY;
+        }
+
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+
+        if self.max() > 0.0 {
+            if rhs.max() > 0.0 {
+                // pos^pos
+                let a = self.max().powf(rhs.max());
+                let b = self.max().powf(rhs.min().max(0.0));
+                let c = self.min().max(0.0).powf(rhs.max());
+                let d = self.min().max(0.0).powf(rhs.min().max(0.0));
+                min = min.min(a).min(b).min(c).min(d);
+                max = max.max(a).max(b).max(c).max(d);
+            }
+
+            if rhs.min() <= 0.0 && rhs.max() >= 0.0 {
+                // pos^0
+                min = min.min(1.0);
+                max = max.max(1.0);
+            }
+
+            if rhs.min() < 0.0 {
+                // pos^neg
+                let a = self.max().powf(rhs.max().min(0.0));
+                let b = self.max().powf(rhs.min());
+                let (c, d) = if self.min() <= 0.0 {
+                    (f64::INFINITY, f64::INFINITY)
+                } else {
+                    let c = self.min().powf(rhs.max().min(0.0));
+                    let d = self.min().powf(rhs.min());
+                    (c, d)
+                };
+                min = min.min(a).min(b).min(c).min(d);
+                max = max.max(a).max(b).max(c).max(d);
+            }
+        }
+
+        if self.min <= 0.0 && self.max >= 0.0 {
+            if rhs.min <= 0.0 && rhs.max >= 0.0 {
+                // 0^0 = 1
+                min = min.min(1.0);
+                max = max.max(1.0);
+            }
+
+            if rhs.max > 0.0 {
+                // 0^pos = 0
+                min = min.min(0.0);
+                max = max.max(0.0);
+            }
+        }
+
+        if min == f64::INFINITY || max == f64::NEG_INFINITY {
+            Self::EMPTY
+        } else {
+            Interval::new(
+                min,
+                max,
+                self.continuous && rhs.continuous && (self.min() > 0.0 || rhs.min() > 0.0),
+            )
+        }
+    }
+
     /*fn powf(&self) -> Self {
         // ?????????
     }*/
@@ -262,5 +330,13 @@ impl ops::Div<Interval> for Interval {
                 )
             }
         }
+    }
+}
+
+impl ops::Neg for Interval {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self::new(-self.max(), -self.min(), self.continuous)
     }
 }

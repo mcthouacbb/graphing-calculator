@@ -50,12 +50,16 @@ pub fn render_segment(
     let x_interval = Interval::new(prev_wx, wx);
     let y_interval = equation.calc_interval(&x_interval);
 
+    if y_interval.empty() || y_interval.lower() > camera.top || y_interval.upper() < camera.bottom {
+        return;
+    }
+
     let mid_wx = (prev_wx + wx) / 2.0;
-    let actual_mid_wy = equation.calc(mid_wx);
+    let mid_wy = equation.calc(mid_wx);
     let expected_mid_wy = (prev_wy + wy) / 2.0;
 
     let mid_cy_diff =
-        (camera.world_to_screen_y(actual_mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
+        (camera.world_to_screen_y(mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
             * height as f64;
 
     let subdivide = if cx_diff < 0.01 {
@@ -70,8 +74,6 @@ pub fn render_segment(
     };
 
     if subdivide {
-        let mid_wx = (prev_wx + wx) / 2.0;
-        let mid_wy = equation.calc(mid_wx);
         if prev_wy.is_finite() || mid_wx.is_finite() {
             render_segment(
                 camera, settings, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
@@ -90,7 +92,17 @@ pub fn render_segment(
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
 
+        if cy > 1.0 && prev_cy > 1.0 || cy < 0.0 && prev_cy < 0.0 {
+            return;
+        }
+
         if settings.show_debug() {
+            ui.painter().vline(
+                ui.max_rect().min.x + width as f32 * prev_cx as f32,
+                ui.max_rect().y_range(),
+                egui::Stroke::new(0.5, egui::Color32::from_rgba_unmultiplied(0, 0, 139, 128)),
+            );
+
             ui.painter().vline(
                 ui.max_rect().min.x + width as f32 * cx as f32,
                 ui.max_rect().y_range(),

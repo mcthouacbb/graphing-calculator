@@ -96,7 +96,7 @@ pub fn render_segment(
             return;
         }
 
-        if settings.show_debug() {
+        if settings.show_debug_subdivisions() {
             ui.painter().vline(
                 ui.max_rect().min.x + width as f32 * prev_cx as f32,
                 ui.max_rect().y_range(),
@@ -107,6 +107,25 @@ pub fn render_segment(
                 ui.max_rect().min.x + width as f32 * cx as f32,
                 ui.max_rect().y_range(),
                 egui::Stroke::new(0.5, egui::Color32::from_rgba_unmultiplied(0, 0, 139, 128)),
+            );
+        }
+
+        if settings.show_debug_intervals() {
+            ui.painter().rect_filled(
+                egui::Rect::from_points(&[
+                    ui.max_rect().min
+                        + egui::vec2(
+                            width as f32 * prev_cx as f32,
+                            height as f32 * camera.world_to_screen_y(y_interval.lower()) as f32,
+                        ),
+                    ui.max_rect().min
+                        + egui::vec2(
+                            width as f32 * cx as f32,
+                            height as f32 * camera.world_to_screen_y(y_interval.upper()) as f32,
+                        ),
+                ]),
+                0,
+                egui::Color32::GREEN,
             );
         }
 

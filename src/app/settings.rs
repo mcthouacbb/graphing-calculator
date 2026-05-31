@@ -35,7 +35,9 @@ pub struct Settings {
     x_axis: AxisSettings,
     y_axis: AxisSettings,
     render_grid: bool,
-    show_debug: bool,
+
+    show_debug_subdivisions: bool,
+    show_debug_intervals: bool,
 }
 
 impl Default for Settings {
@@ -49,7 +51,9 @@ impl Default for Settings {
             x_axis: AxisSettings::default(),
             y_axis: AxisSettings::default(),
             render_grid: true,
-            show_debug: false,
+
+            show_debug_subdivisions: false,
+            show_debug_intervals: false,
         }
     }
 }
@@ -78,7 +82,8 @@ impl Settings {
 
             ui.add_space(10.0);
 
-            ui.checkbox(&mut self.show_debug, "Show debug view");
+            ui.checkbox(&mut self.show_debug_subdivisions, "Show debug subdivisions");
+            ui.checkbox(&mut self.show_debug_intervals, "Show debug subdivisions");
         });
     }
 
@@ -94,8 +99,12 @@ impl Settings {
         self.render_grid
     }
 
-    pub fn show_debug(&self) -> bool {
-        self.show_debug
+    pub fn show_debug_subdivisions(&self) -> bool {
+        self.show_debug_subdivisions
+    }
+
+    pub fn show_debug_intervals(&self) -> bool {
+        self.show_debug_intervals
     }
 
     fn axis_settings(ui: &mut egui::Ui, axis: &mut AxisSettings, name: &str) {

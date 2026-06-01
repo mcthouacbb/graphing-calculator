@@ -62,7 +62,7 @@ pub fn render_segment(
         (camera.world_to_screen_y(mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
             * height as f64;
 
-    let subdivide = if cx_diff < 0.01 {
+    let subdivide = if cx_diff < 0.1 {
         false
     } else if !prev_wy.is_finite() || !wy.is_finite() || cy_diff > 8.0 {
         true

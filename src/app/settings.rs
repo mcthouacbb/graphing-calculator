@@ -83,7 +83,7 @@ impl Settings {
             ui.add_space(10.0);
 
             ui.checkbox(&mut self.show_debug_subdivisions, "Show debug subdivisions");
-            ui.checkbox(&mut self.show_debug_intervals, "Show debug subdivisions");
+            ui.checkbox(&mut self.show_debug_intervals, "Show debug intervals");
         });
     }
 

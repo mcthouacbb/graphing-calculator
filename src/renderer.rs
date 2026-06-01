@@ -14,6 +14,7 @@ mod structure;
 
 pub fn render(
     camera: &Camera,
+    settings: &Settings,
     width: usize,
     height: usize,
     ui: &mut egui::Ui,
@@ -22,7 +23,7 @@ pub fn render(
     for equation in equations {
         match equation {
             Equation::Explicit(explicit) => {
-                graph_explicit_equation(camera, width, height, ui, explicit);
+                graph_explicit_equation(camera, settings, width, height, ui, explicit);
             }
         }
     }

@@ -1,9 +1,14 @@
-use crate::{app::camera::Camera, equation::explicit::ExplicitEquation, interval::Interval};
+use crate::{
+    app::{camera::Camera, settings::Settings},
+    equation::explicit::ExplicitEquation,
+    interval::Interval,
+};
 
 use eframe::egui;
 
 pub fn graph_explicit_equation(
     camera: &Camera,
+    settings: &Settings,
     width: usize,
     height: usize,
     ui: &mut egui::Ui,
@@ -17,7 +22,7 @@ pub fn graph_explicit_equation(
 
         if let Some((prev_wx, prev_wy)) = prev {
             render_segment(
-                camera, width, height, ui, equation, prev_wx, prev_wy, wx, wy,
+                camera, settings, width, height, ui, equation, prev_wx, prev_wy, wx, wy,
             );
         }
 
@@ -27,6 +32,7 @@ pub fn graph_explicit_equation(
 
 pub fn render_segment(
     camera: &Camera,
+    settings: &Settings,
     width: usize,
     height: usize,
     ui: &mut egui::Ui,
@@ -44,15 +50,19 @@ pub fn render_segment(
     let x_interval = Interval::new(prev_wx, wx);
     let y_interval = equation.calc_interval(&x_interval);
 
+    if y_interval.empty() || y_interval.lower() > camera.top || y_interval.upper() < camera.bottom {
+        return;
+    }
+
     let mid_wx = (prev_wx + wx) / 2.0;
-    let actual_mid_wy = equation.calc(mid_wx);
+    let mid_wy = equation.calc(mid_wx);
     let expected_mid_wy = (prev_wy + wy) / 2.0;
 
     let mid_cy_diff =
-        (camera.world_to_screen_y(actual_mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
+        (camera.world_to_screen_y(mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
             * height as f64;
 
-    let subdivide = if cx_diff < 0.01 {
+    let subdivide = if cx_diff < 0.1 {
         false
     } else if !prev_wy.is_finite() || !wy.is_finite() || cy_diff > 8.0 {
         true
@@ -64,15 +74,15 @@ pub fn render_segment(
     };
 
     if subdivide {
-        let mid_wx = (prev_wx + wx) / 2.0;
-        let mid_wy = equation.calc(mid_wx);
         if prev_wy.is_finite() || mid_wx.is_finite() {
             render_segment(
-                camera, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
+                camera, settings, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
             );
         }
         if mid_wy.is_finite() || wy.is_finite() {
-            render_segment(camera, width, height, ui, equation, mid_wx, mid_wy, wx, wy);
+            render_segment(
+                camera, settings, width, height, ui, equation, mid_wx, mid_wy, wx, wy,
+            );
         }
     } else if wy.is_finite()
         && prev_wy.is_finite()
@@ -81,6 +91,43 @@ pub fn render_segment(
     {
         let (cx, cy) = camera.world_to_screen(wx, wy);
         let (prev_cx, prev_cy) = camera.world_to_screen(prev_wx, prev_wy);
+
+        if cy > 1.0 && prev_cy > 1.0 || cy < 0.0 && prev_cy < 0.0 {
+            return;
+        }
+
+        if settings.show_debug_subdivisions() {
+            ui.painter().vline(
+                ui.max_rect().min.x + width as f32 * prev_cx as f32,
+                ui.max_rect().y_range(),
+                egui::Stroke::new(0.5, egui::Color32::from_rgba_unmultiplied(0, 0, 139, 128)),
+            );
+
+            ui.painter().vline(
+                ui.max_rect().min.x + width as f32 * cx as f32,
+                ui.max_rect().y_range(),
+                egui::Stroke::new(0.5, egui::Color32::from_rgba_unmultiplied(0, 0, 139, 128)),
+            );
+        }
+
+        if settings.show_debug_intervals() {
+            ui.painter().rect_filled(
+                egui::Rect::from_points(&[
+                    ui.max_rect().min
+                        + egui::vec2(
+                            width as f32 * prev_cx as f32,
+                            height as f32 * camera.world_to_screen_y(y_interval.lower()) as f32,
+                        ),
+                    ui.max_rect().min
+                        + egui::vec2(
+                            width as f32 * cx as f32,
+                            height as f32 * camera.world_to_screen_y(y_interval.upper()) as f32,
+                        ),
+                ]),
+                0,
+                egui::Color32::GREEN,
+            );
+        }
 
         ui.painter().line_segment(
             [

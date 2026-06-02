@@ -16,13 +16,14 @@ pub fn graph_explicit_equation(
 ) {
     let mut prev = None;
 
-    for x in (0..width).step_by(8) {
+    for x in (0..=width).step_by(8) {
         let wx = camera.screen_to_world_x((x as f64 + 0.5) / width as f64);
         let wy = equation.calc(wx);
 
         if let Some((prev_wx, prev_wy)) = prev {
+            let y_interval = equation.calc_interval(&Interval::new(prev_wx, wx));
             render_segment(
-                camera, settings, width, height, ui, equation, prev_wx, prev_wy, wx, wy,
+                camera, settings, width, height, ui, equation, prev_wx, prev_wy, wx, wy, y_interval,
             );
         }
 
@@ -41,14 +42,12 @@ pub fn render_segment(
     prev_wy: f64,
     wx: f64,
     wy: f64,
+    y_interval: Interval,
 ) {
     let cx_diff =
         (camera.world_to_screen_x(wx) - camera.world_to_screen_x(prev_wx)).abs() * width as f64;
     let cy_diff =
         (camera.world_to_screen_y(wy) - camera.world_to_screen_y(prev_wy)).abs() * height as f64;
-
-    let x_interval = Interval::new(prev_wx, wx);
-    let y_interval = equation.calc_interval(&x_interval);
 
     if y_interval.empty() || y_interval.lower() > camera.top || y_interval.upper() < camera.bottom {
         return;
@@ -58,9 +57,16 @@ pub fn render_segment(
     let mid_wy = equation.calc(mid_wx);
     let expected_mid_wy = (prev_wy + wy) / 2.0;
 
+    let left_interval = equation.calc_interval(&Interval::new(prev_wx, mid_wx));
+    let right_interval = equation.calc_interval(&Interval::new(mid_wx, wx));
+
     let mid_cy_diff =
         (camera.world_to_screen_y(mid_wy) - camera.world_to_screen_y(expected_mid_wy)).abs()
             * height as f64;
+
+    let likely_alias = right_interval.length() > y_interval.length() / 2.0
+        && left_interval.length() > y_interval.length() / 2.0
+        && ((wy - prev_wy).abs() < y_interval.length() / 2.0 || cx_diff >= 1.0);
 
     let subdivide = if cx_diff < 0.1 {
         false
@@ -71,17 +77,38 @@ pub fn render_segment(
             || !mid_cy_diff.is_finite()
             || !y_interval.is_finite()
             || !y_interval.continuous()
+            || likely_alias
     };
 
     if subdivide {
         if prev_wy.is_finite() || mid_wx.is_finite() {
             render_segment(
-                camera, settings, width, height, ui, equation, prev_wx, prev_wy, mid_wx, mid_wy,
+                camera,
+                settings,
+                width,
+                height,
+                ui,
+                equation,
+                prev_wx,
+                prev_wy,
+                mid_wx,
+                mid_wy,
+                left_interval,
             );
         }
         if mid_wy.is_finite() || wy.is_finite() {
             render_segment(
-                camera, settings, width, height, ui, equation, mid_wx, mid_wy, wx, wy,
+                camera,
+                settings,
+                width,
+                height,
+                ui,
+                equation,
+                mid_wx,
+                mid_wy,
+                wx,
+                wy,
+                right_interval,
             );
         }
     } else if wy.is_finite()

@@ -60,7 +60,10 @@ pub fn resolve_builtin_functions(expr: &mut Expr) -> Result<(), ResolveError> {
             }
             return Err(ResolveError::UnknownFunction(func_expr.name().to_string()));
         }
-        _ => (),
+        Expr::ConstPowExpr(const_pow_expr) => {
+            resolve_builtin_functions(const_pow_expr.base_mut())?;
+        }
+        Expr::Var(_) | Expr::Const(_) => (),
     }
     Ok(())
 }

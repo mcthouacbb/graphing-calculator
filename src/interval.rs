@@ -52,6 +52,14 @@ impl Interval {
         self.upper
     }
 
+    pub fn length(&self) -> f64 {
+        if self.empty() {
+            0.0
+        } else {
+            self.upper() - self.lower()
+        }
+    }
+
     pub fn sin(&self) -> Self {
         if self.empty() {
             return Self::EMPTY;
